@@ -13,9 +13,9 @@ class Appointment(models.Model):
     patient = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField()
     time = models.TimeField()
-    status = models.CharField(max_length=20, default='scheduled')   
+    status = models.CharField(max_length=20, default='scheduled')  
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.patient.name
+        return self.patient.username
     
