@@ -1,0 +1,70 @@
+{% extends 'clinic/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Page Header -->
+    <div class="text-center mb-10">
+        <div class="w-14 h-14 bg-[#2A9D8F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-search-heart text-[#2A9D8F] text-2xl"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold text-[#264653]">Find a Doctor</h1>
+        <p class="text-[#8B9AA8] mt-2 max-w-md mx-auto">Browse our experienced healthcare professionals and book your appointment</p>
+    </div>
+
+    {% if doctors %}
+        <!-- Doctor Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for doctor in doctors %}
+            <div class="bg-white rounded-2xl shadow-sm shadow-gray-200/50 border border-gray-100 p-6 card-hover">
+                <!-- Avatar -->
+                <div class="flex items-center space-x-4 mb-5">
+                    <div class="w-16 h-16 rounded-full bg-[#E8F5F2] flex items-center justify-center flex-shrink-0 border-2 border-[#2A9D8F]/20">
+                        <i class="bi bi-person-circle text-[#2A9D8F] text-3xl"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="text-lg font-bold text-[#264653] truncate">Dr. {{ doctor.name }}</h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E8F5F2] text-[#2A9D8F] border border-[#2A9D8F]/20">
+                            <i class="bi bi-mortarboard mr-1"></i>
+                            {{ doctor.specialty }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Quick Info -->
+                <div class="space-y-2 mb-5 text-sm text-[#8B9AA8]">
+                    <div class="flex items-center space-x-2">
+                        <i class="bi bi-clock"></i>
+                        <span>Available for appointments</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="bi bi-person-check"></i>
+                        <span>Accepting new patients</span>
+                    </div>
+                </div>
+
+                <!-- Book Button -->
+                <a href="{% url 'book_appointment' doctor.id %}" class="w-full py-2.5 px-4 bg-[#2A9D8F] hover:bg-[#238276] text-white font-semibold rounded-xl btn-transition shadow-sm hover:shadow-md hover:shadow-[#2A9D8F]/20 flex items-center justify-center space-x-2 text-sm">
+                    <i class="bi bi-calendar-plus"></i>
+                    <span>Book Appointment</span>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-2xl shadow-sm shadow-gray-200/50 border border-gray-100 p-12 text-center max-w-lg mx-auto">
+            <div class="w-20 h-20 bg-[#F0F4F8] rounded-full flex items-center justify-center mx-auto mb-5">
+                <i class="bi bi-people text-[#8B9AA8] text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#264653] mb-2">No doctors available</h3>
+            <p class="text-[#8B9AA8] text-sm">No doctors available right now.</p>
+            <div class="mt-6 flex justify-center space-x-1">
+                <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/20"></div>
+                <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/40"></div>
+                <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/20"></div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

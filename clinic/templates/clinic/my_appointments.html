@@ -1,0 +1,98 @@
+{% extends 'clinic/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <!-- Page Header -->
+    <div class="text-center mb-10">
+        <div class="w-14 h-14 bg-[#2A9D8F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-calendar-check text-[#2A9D8F] text-2xl"></i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold text-[#264653]">My Appointments</h1>
+        <p class="text-[#8B9AA8] mt-2">View and manage your upcoming appointments</p>
+    </div>
+
+    {% if appointments %}
+        <!-- Appointment List -->
+        <div class="space-y-4">
+            {% for appointment in appointments %}
+            <div class="bg-white rounded-2xl shadow-sm shadow-gray-200/50 border border-gray-100 p-5 sm:p-6 card-hover">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <!-- Left: Doctor Info -->
+                    <div class="flex items-center space-x-4 min-w-0">
+                        <div class="w-14 h-14 rounded-full bg-[#E8F5F2] flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-person-circle text-[#2A9D8F] text-2xl"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-lg font-bold text-[#264653] truncate">Dr. {{ appointment.doctor.name }}</h3>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#E8F5F2] text-[#2A9D8F]">
+                                {{ appointment.doctor.specialty }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Date, Time, Status & Action -->
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+                        <!-- Date & Time -->
+                        <div class="flex items-center space-x-4 text-sm">
+                            <div class="flex items-center space-x-1.5 text-[#264653]">
+                                <i class="bi bi-calendar3 text-[#8B9AA8]"></i>
+                                <span class="font-medium">{{ appointment.date|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="flex items-center space-x-1.5 text-[#264653]">
+                                <i class="bi bi-clock text-[#8B9AA8]"></i>
+                                <span class="font-medium">{{ appointment.time|time:"g:i A" }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        {% with status=appointment.status|lower %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold 
+                            {% if status == 'scheduled' or status == 'pending' %}
+                                bg-amber-50 text-[#F4A261] border border-[#F4A261]/20
+                            {% elif status == 'confirmed' %}
+                                bg-emerald-50 text-[#2A9D8F] border border-[#2A9D8F]/20
+                            {% elif status == 'cancelled' or status == 'canceled' %}
+                                bg-red-50 text-[#E76F51] border border-[#E76F51]/20
+                            {% else %}
+                                bg-gray-50 text-[#8B9AA8] border border-gray-200
+                            {% endif %}">
+                            <i class="bi 
+                                {% if status == 'scheduled' or status == 'pending' %}bi-hourglass-split
+                                {% elif status == 'confirmed' %}bi-check-circle
+                                {% elif status == 'cancelled' or status == 'canceled' %}bi-x-circle
+                                {% else %}bi-question-circle
+                                {% endif %} mr-1.5"></i>
+                            {{ appointment.status|title }}
+                        </span>
+                        {% endwith %}
+
+                        <!-- Cancel Button -->
+                        {% if appointment.status|lower != 'cancelled' and appointment.status|lower != 'canceled' %}
+                        <a href="{% url 'cancel_appointment' appointment.id %}" 
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-[#E76F51] bg-red-50 hover:bg-red-100 rounded-xl btn-transition border border-red-100">
+                            <i class="bi bi-x-circle mr-1.5"></i>
+                            Cancel
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-2xl shadow-sm shadow-gray-200/50 border border-gray-100 p-12 text-center max-w-lg mx-auto">
+            <div class="w-20 h-20 bg-[#F0F4F8] rounded-full flex items-center justify-center mx-auto mb-5">
+                <i class="bi bi-calendar-plus text-[#8B9AA8] text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-[#264653] mb-2">No appointments yet</h3>
+            <p class="text-[#8B9AA8] text-sm mb-6">You have no appointments booked. Find a doctor to get started.</p>
+            <a href="{% url 'doctor_list' %}" class="inline-flex items-center px-6 py-3 bg-[#2A9D8F] hover:bg-[#238276] text-white font-semibold rounded-xl btn-transition shadow-md shadow-[#2A9D8F]/20 hover:shadow-lg">
+                <i class="bi bi-search-heart mr-2"></i>
+                Find a Doctor
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

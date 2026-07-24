@@ -1,0 +1,104 @@
+{% extends 'clinic/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8 sm:p-10">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="w-14 h-14 bg-[#2A9D8F]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-box-arrow-in-right text-[#2A9D8F] text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-[#264653]">Welcome Back</h1>
+                <p class="text-[#8B9AA8] text-sm mt-1.5">Sign in to your MediBook account</p>
+            </div>
+
+            <!-- Login Form -->
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
+                    <i class="bi bi-exclamation-triangle text-red-500 mt-0.5"></i>
+                    <div class="text-sm text-red-600">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-[#264653] mb-1.5">
+                        {% if field.name == 'username' %}
+                            <i class="bi bi-person mr-1.5 text-[#8B9AA8]"></i>Username
+                        {% else %}
+                            <i class="bi bi-lock mr-1.5 text-[#8B9AA8]"></i>Password
+                        {% endif %}
+                    </label>
+                    <div class="relative">
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <i class="bi bi-exclamation-circle text-red-500"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if field.errors %}
+                    <p class="mt-1 text-sm text-red-500">{{ field.errors.0 }}</p>
+                    {% endif %}
+                    {% if field.help_text and not field.errors %}
+                    <p class="mt-1 text-xs text-[#8B9AA8]">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="w-full py-3 px-4 bg-[#2A9D8F] hover:bg-[#238276] text-white font-semibold rounded-xl btn-transition shadow-md shadow-[#2A9D8F]/20 hover:shadow-lg hover:shadow-[#2A9D8F]/30 flex items-center justify-center space-x-2">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Sign In</span>
+                </button>
+            </form>
+
+            <!-- Footer Link -->
+            <p class="mt-6 text-center text-sm text-[#8B9AA8]">
+                Don't have an account?
+                <a href="{% url 'register' %}" class="text-[#2A9D8F] hover:text-[#238276] font-semibold btn-transition">
+                    Create one <i class="bi bi-arrow-right"></i>
+                </a>
+            </p>
+        </div>
+
+        <!-- Decorative dots -->
+        <div class="flex justify-center mt-6 space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/20"></div>
+            <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/40"></div>
+            <div class="w-2 h-2 rounded-full bg-[#2A9D8F]/20"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Style the form inputs rendered by Django */
+    #id_username, #id_password {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        outline: none;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        color: #264653;
+        background: white;
+    }
+    #id_username:focus, #id_password:focus {
+        border-color: #2A9D8F;
+        box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+    }
+    #id_username::placeholder, #id_password::placeholder {
+        color: #8B9AA8;
+    }
+</style>
+{% endblock %}

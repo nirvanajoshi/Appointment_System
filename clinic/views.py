@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import login, authenticate, logout
-from django.db import IntegrityError
+from django.contrib.auth import login, logout
+from django.db import IntegrityError, transaction
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from .forms import AppointmentForm
@@ -21,14 +21,11 @@ def register(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('doctor_list')
+            user = form.get_user()
+            login(request, user)
+            return redirect('doctor_list')
     else:
         form = AuthenticationForm()
     return render(request, 'clinic/login.html', {'form': form})
@@ -54,10 +51,11 @@ def book_appointment(request, doctor_id):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             try:
-                appointment = form.save(commit=False)
-                appointment.patient = request.user
-                appointment.doctor = doctor
-                appointment.save()
+                with transaction.atomic():
+                    appointment = form.save(commit=False)
+                    appointment.patient = request.user
+                    appointment.doctor = doctor
+                    appointment.save()
                 messages.success(request, 'Appointment booked successfully.')
                 return redirect('my_appointments')
             except IntegrityError:
@@ -70,6 +68,8 @@ def book_appointment(request, doctor_id):
 def cancel_appointment(request, appointment_id):
     appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user)
     if request.method == 'POST':
-        appointment.delete()
+        appointment.status = 'cancelled'
+        appointment.save()
+        messages.success(request, f'Appointment with Dr. {appointment.doctor.name} has been cancelled.')
         return redirect('my_appointments')
     return render(request, 'clinic/cancel_appointment.html', {'appointment': appointment})

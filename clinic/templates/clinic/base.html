@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBook - Doctor Appointment Booking</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#2A9D8F',
+                        'primary-dark': '#238276',
+                        'primary-light': '#E8F5F2',
+                        'clinical': '#F0F4F8',
+                        'text-main': '#264653',
+                        'text-muted': '#8B9AA8',
+                        'status-pending': '#F4A261',
+                        'status-confirmed': '#2A9D8F',
+                        'status-cancelled': '#E76F51',
+                    },
+                    borderRadius: {
+                        'xl': '12px',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8;
+            color: #264653;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F0F4F8;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8B9AA8;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6B7B8B;
+        }
+        /* Smooth transitions */
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-transition {
+            transition: all 0.2s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand -->
+                <a href="{% url 'doctor_list' %}" class="flex items-center space-x-2 group">
+                    <div class="w-9 h-9 bg-[#2A9D8F] rounded-lg flex items-center justify-center group-hover:bg-[#238276] btn-transition">
+                        <i class="bi bi-heart-pulse text-white text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold text-[#264653] tracking-tight">Medi<span class="text-[#2A9D8F]">Book</span></span>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center space-x-1">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'doctor_list' %}" class="px-4 py-2 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm btn-transition">
+                            <i class="bi bi-search-heart mr-1.5"></i>Find a Doctor
+                        </a>
+                        <a href="{% url 'my_appointments' %}" class="px-4 py-2 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm btn-transition">
+                            <i class="bi bi-calendar-check mr-1.5"></i>My Appointments
+                        </a>
+                        <div class="h-6 w-px bg-gray-200 mx-2"></div>
+                        <div class="flex items-center space-x-2 pl-1">
+                            <div class="w-8 h-8 rounded-full bg-[#2A9D8F]/10 flex items-center justify-center">
+                                <i class="bi bi-person text-[#2A9D8F] text-sm"></i>
+                            </div>
+                            <span class="text-sm text-[#264653] font-medium">{{ user.username }}</span>
+                            <a href="{% url 'logout' %}" class="ml-2 px-3 py-1.5 rounded-lg text-sm font-medium text-[#E76F51] hover:bg-red-50 btn-transition">
+                                <i class="bi bi-box-arrow-right mr-1"></i>Logout
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="px-4 py-2 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm btn-transition">
+                            <i class="bi bi-box-arrow-in-right mr-1.5"></i>Login
+                        </a>
+                        <a href="{% url 'register' %}" class="px-5 py-2 rounded-lg bg-[#2A9D8F] text-white font-medium text-sm hover:bg-[#238276] btn-transition shadow-sm">
+                            <i class="bi bi-person-plus mr-1.5"></i>Register
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-[#264653] hover:bg-[#F0F4F8] btn-transition" onclick="toggleMobileMenu()">
+                    <i id="menu-icon" class="bi bi-list text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 px-4 py-3 space-y-1">
+            {% if user.is_authenticated %}
+                <a href="{% url 'doctor_list' %}" class="block px-4 py-3 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm">
+                    <i class="bi bi-search-heart mr-2"></i>Find a Doctor
+                </a>
+                <a href="{% url 'my_appointments' %}" class="block px-4 py-3 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm">
+                    <i class="bi bi-calendar-check mr-2"></i>My Appointments
+                </a>
+                <hr class="my-2 border-gray-100">
+                <div class="flex items-center space-x-2 px-4 py-2">
+                    <div class="w-8 h-8 rounded-full bg-[#2A9D8F]/10 flex items-center justify-center">
+                        <i class="bi bi-person text-[#2A9D8F] text-sm"></i>
+                    </div>
+                    <span class="text-sm text-[#264653] font-medium">{{ user.username }}</span>
+                </div>
+                <a href="{% url 'logout' %}" class="block px-4 py-3 rounded-lg text-[#E76F51] hover:bg-red-50 font-medium text-sm">
+                    <i class="bi bi-box-arrow-right mr-2"></i>Logout
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="block px-4 py-3 rounded-lg text-[#264653] hover:bg-[#F0F4F8] font-medium text-sm">
+                    <i class="bi bi-box-arrow-in-right mr-2"></i>Login
+                </a>
+                <a href="{% url 'register' %}" class="block px-4 py-3 rounded-lg bg-[#2A9D8F] text-white font-medium text-sm">
+                    <i class="bi bi-person-plus mr-2"></i>Register
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ===== MESSAGES / ALERTS ===== -->
+    {% if messages %}
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        {% for message in messages %}
+        <div class="flex items-center justify-between px-5 py-3.5 rounded-xl shadow-sm border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-[#E8F5F2] border-[#2A9D8F]/20 text-[#264653]{% endif %}" role="alert">
+            <div class="flex items-center space-x-2.5">
+                {% if message.tags == 'error' %}
+                    <i class="bi bi-exclamation-circle text-red-500 text-lg"></i>
+                {% else %}
+                    <i class="bi bi-check-circle text-[#2A9D8F] text-lg"></i>
+                {% endif %}
+                <span class="text-sm font-medium">{{ message }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-[#8B9AA8] hover:text-[#264653] btn-transition">
+                <i class="bi bi-x-lg text-sm"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-white border-t border-gray-100 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
+                <div class="flex items-center space-x-2 text-[#8B9AA8] text-sm">
+                    <i class="bi bi-heart-pulse text-[#2A9D8F]"></i>
+                    <span>&copy; {% now "Y" %} MediBook. All rights reserved.</span>
+                </div>
+                <div class="flex items-center space-x-4 text-sm text-[#8B9AA8]">
+                    <span class="hover:text-[#264653] btn-transition cursor-pointer">Privacy</span>
+                    <span class="hover:text-[#264653] btn-transition cursor-pointer">Terms</span>
+                    <span class="hover:text-[#264653] btn-transition cursor-pointer">Contact</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const icon = document.getElementById('menu-icon');
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('bi-list');
+            icon.classList.toggle('bi-x');
+        }
+    </script>
+</body>
+</html>
